@@ -20,7 +20,7 @@ Repo to store the source files for the calorie tracker for the Java levelup
       <li>username: Approprpiate user for that day, date: requested date for total calories</li>
       <li>method: GET</li>
       <li>URI: '{dev-path}/<b>{username}</b>/<b>{date}</b>/total'</li>
-      
+      </ul>
   </li>
   <li>
     Change units
