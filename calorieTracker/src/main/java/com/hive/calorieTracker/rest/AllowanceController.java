@@ -1,6 +1,5 @@
 package com.hive.calorieTracker.rest;
 
-import org.springframework.expression.ExpressionException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
