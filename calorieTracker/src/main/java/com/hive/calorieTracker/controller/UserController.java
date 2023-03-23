@@ -86,14 +86,20 @@ public class UserController {
                 if(userObj.getPreferedUnit().ordinal() == 0 && preferedUnit.ordinal() == 1){
                     foodEntry.setCalories((int) (foodEntry.getCalories()*4.184));
                     userObj.setPreferedUnit(preferedUnit);
+                    userObj.setBmr((float) (userObj.getBmr()*4.184));
+                    userObj.setAllowance((float) (userObj.getAllowance()*4.184));
 
                 } else if (userObj.getPreferedUnit().ordinal() == 1 && preferedUnit.ordinal() == 0) {
                     foodEntry.setCalories((int) (foodEntry.getCalories()*0.239));
                     userObj.setPreferedUnit(preferedUnit);
+                    userObj.setBmr((float) (userObj.getBmr()*0.239));
+                    userObj.setAllowance((float) (userObj.getAllowance()*0.239));
                 }
             });
 
         User updatedUserObj = userRepo.save(userObj);
+        updatedUserObj.add(linkTo(methodOn(UserController.class).getUserById(updatedUserObj.getId())).withSelfRel());
+        updatedUserObj.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
 
         return ResponseHandler.parseResponse("succes",HttpStatus.OK, updatedUserObj);
     }
