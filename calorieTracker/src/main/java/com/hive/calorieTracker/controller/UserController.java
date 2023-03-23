@@ -4,7 +4,7 @@ import com.hive.calorieTracker.constants.Status;
 import com.hive.calorieTracker.constants.Unit;
 import com.hive.calorieTracker.model.User;
 import com.hive.calorieTracker.repository.FoodEntryRepo;
-import com.hive.calorieTracker.repository.UserRepo;;
+import com.hive.calorieTracker.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -89,6 +89,7 @@ public class UserController {
                 user.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
                 user.add(linkTo(methodOn(UserController.class).getUserAllowance(user.getFirstName())).withSelfRel());
                 user.add(linkTo(methodOn(UserController.class).getUserBmr(user.getFirstName())).withSelfRel());
+                //I don't know if this should be added like this
                 return user;
             }).collect(Collectors.toList());
 
