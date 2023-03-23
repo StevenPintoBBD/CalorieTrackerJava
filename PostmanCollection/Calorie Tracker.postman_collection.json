@@ -196,6 +196,137 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Allowance and BMR",
+			"item": [
+				{
+					"name": "unitChange",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/1/units?unit=CAL",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"1",
+								"units"
+							],
+							"query": [
+								{
+									"key": "unit",
+									"value": "CAL"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllowance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/user/allowance/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"allowance",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "changeGoalStatus",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/user/allowance/2/lose_weight",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"allowance",
+								"2",
+								"lose_weight"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getBMR",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/user/bmr/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"bmr",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateBMR",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/user/bmr/1/update?bmr=2000",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"bmr",
+								"1",
+								"update"
+							],
+							"query": [
+								{
+									"key": "bmr",
+									"value": "2000"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DaysEntries",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
 		}
 	]
 }
