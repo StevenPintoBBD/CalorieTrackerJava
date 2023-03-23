@@ -1,4 +1,4 @@
-package com.hive.calorieTracker.model;
+package com.hive.calorieTracker.constants;
 
 public enum Status {
     GAIN_WEIGHT,
