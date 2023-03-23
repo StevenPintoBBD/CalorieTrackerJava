@@ -1,9 +1,12 @@
 package com.hive.calorieTracker.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.RepresentationModel;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -19,6 +22,8 @@ public class FoodEntry extends RepresentationModel {
     private Long userid;
 
     private String foodName;
-    private int calories;
-    private Date entryDate;
+    private Integer calories;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate entryDate;
 }

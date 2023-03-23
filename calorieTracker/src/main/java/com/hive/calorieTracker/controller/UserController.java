@@ -43,7 +43,7 @@ public class UserController {
         try {
             List<User> users = userRepo.findAll();
             if(users.isEmpty()){
-                return ResponseHandler.parseResponse("No users found", HttpStatus.NO_CONTENT, null);
+                return ResponseHandler.parseResponse("No users found", HttpStatus.NOT_FOUND, null);
             }
             users = users.stream().map(user -> {
                         user.add(linkTo(methodOn(UserController.class).getUserById(user.getId())).withSelfRel());
