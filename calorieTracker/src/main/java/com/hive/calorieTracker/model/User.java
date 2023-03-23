@@ -3,11 +3,12 @@ package com.hive.calorieTracker.model;
 import com.hive.calorieTracker.constants.Unit;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.hateoas.RepresentationModel;
 
 @Data
 @Entity
 @Table(name="Users")
-public class User {
+public class User extends RepresentationModel<User> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
