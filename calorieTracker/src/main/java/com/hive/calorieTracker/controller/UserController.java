@@ -1,6 +1,7 @@
 package com.hive.calorieTracker.controller;
 
 import com.hive.calorieTracker.constants.Unit;
+import com.hive.calorieTracker.model.FoodEntry;
 import com.hive.calorieTracker.model.User;
 import com.hive.calorieTracker.repository.FoodEntryRepo;
 import com.hive.calorieTracker.repository.UserRepo;
@@ -74,4 +75,27 @@ public class UserController {
         userObj.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
         return ResponseHandler.parseResponse("Successfully added the user", HttpStatus.OK, userObj);
     }
+
+    @PutMapping("/{id}/units")
+    ResponseEntity<Object> convertUnits(@PathVariable Long id, @RequestParam("preferedUnit") Unit preferedUnit) {
+        User userObj = userRepo.findById(id).get();
+
+        foodRepo.findAll().stream().
+            filter(foodEntry -> foodEntry.getUserid() == id).
+            forEach(foodEntry -> {
+                if(userObj.getPreferedUnit().ordinal() == 0 && preferedUnit.ordinal() == 1){
+                    foodEntry.setCalories((int) (foodEntry.getCalories()*4.184));
+                    userObj.setPreferedUnit(preferedUnit);
+
+                } else if (userObj.getPreferedUnit().ordinal() == 1 && preferedUnit.ordinal() == 0) {
+                    foodEntry.setCalories((int) (foodEntry.getCalories()*0.239));
+                    userObj.setPreferedUnit(preferedUnit);
+                }
+            });
+
+        User updatedUserObj = userRepo.save(userObj);
+
+        return ResponseHandler.parseResponse("succes",HttpStatus.OK, updatedUserObj);
+    }
+
 }
