@@ -2,6 +2,7 @@ package com.hive.calorieTracker.controller;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import com.hive.calorieTracker.constants.Unit;
 import com.hive.calorieTracker.model.FoodEntry;
 import com.hive.calorieTracker.model.User;
 import com.hive.calorieTracker.repository.FoodEntryRepo;
@@ -9,6 +10,7 @@ import com.hive.calorieTracker.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -68,6 +70,39 @@ public class FoodEntryController {
         }
         catch (Exception e) {
             return ResponseHandler.parseResponse("Sorry, we are experiencing technical issues", HttpStatus.INTERNAL_SERVER_ERROR, null);
+        }
+    }
+
+    @PutMapping("/update/foodentry/{id}")
+    public ResponseEntity<Object> updateFoodEntry(@PathVariable Long id, @RequestBody FoodEntry foodEntry) {
+        Optional<FoodEntry> foodCheck = foodEntryRepo.findById(id);
+        if(foodCheck.isEmpty()){
+            return ResponseHandler.parseResponse("Can not update, food entry does not exist", HttpStatus.BAD_REQUEST,null);
+        } else {
+            FoodEntry updatedFoodEntry = foodCheck.get();
+            if(foodEntry.getFoodName().isEmpty()){
+
+                return ResponseHandler.parseResponse("Bad request: invalid food name ", HttpStatus.BAD_REQUEST,null);
+            }
+            updatedFoodEntry.setFoodName(foodEntry.getFoodName());
+            updatedFoodEntry.setEntryDate(foodEntry.getEntryDate());
+            updatedFoodEntry.setCalories(foodEntry.getCalories());
+
+            FoodEntry foodObj = foodEntryRepo.save(updatedFoodEntry);
+            foodObj.add(linkTo(methodOn(FoodEntryController.class).getFoodEntryById(foodObj.getId())).withSelfRel());
+            foodObj.add(linkTo(methodOn(FoodEntryController.class).getAllEntries()).withSelfRel());
+            return ResponseHandler.parseResponse("Successfully updated food entry: " + id.toString(), HttpStatus.OK, foodObj);
+        }
+    }
+
+    @DeleteMapping("/remove/foodentry/{id}")
+    public ResponseEntity<Object> deleteFoodEntry(@PathVariable Long id) {
+        Optional<FoodEntry> foodEntryCheck = foodEntryRepo.findById(id);
+        if(foodEntryCheck.isEmpty()){
+            return ResponseHandler.parseResponse("Can not delete, food entry does not exist", HttpStatus.BAD_REQUEST,null);
+        } else {
+            foodEntryRepo.deleteById(id);
+            return ResponseHandler.parseResponse("Successfully deleted the food entry", HttpStatus.OK,null);
         }
     }
 }

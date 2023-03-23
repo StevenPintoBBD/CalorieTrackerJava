@@ -59,7 +59,7 @@ public class UserController {
         }
     }
     @PostMapping("/upload/user")
-    ResponseEntity<Object> addUser(@RequestBody User user) {
+    public ResponseEntity<Object> addUser(@RequestBody User user) {
 
         //Do validation for the user
         if(user.getFirstName().isEmpty() || user.getLastName().isEmpty()){
@@ -73,5 +73,43 @@ public class UserController {
         userObj.add(linkTo(methodOn(UserController.class).getUserById(userObj.getId())).withSelfRel());
         userObj.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
         return ResponseHandler.parseResponse("Successfully added the user", HttpStatus.OK, userObj);
+    }
+
+    @PutMapping("/update/user/{id}")
+    ResponseEntity<Object> updateUser(@PathVariable Long id, @RequestBody User user){
+        Optional<User> userCheck = userRepo.findById(id);
+        if(userCheck.isEmpty()){
+            return ResponseHandler.parseResponse("Can not update, user does not exist", HttpStatus.BAD_REQUEST,null);
+        } else {
+            User updatedUser = userCheck.get();
+            if(user.getFirstName().isEmpty() || user.getLastName().isEmpty()){
+
+                return ResponseHandler.parseResponse("Bad request: invalid first or last name ", HttpStatus.BAD_REQUEST,null);
+            } else if (!(user.getPreferedUnit() == Unit.CAL || user.getPreferedUnit() == Unit.KJ)) {
+                return ResponseHandler.parseResponse("Bad request: invalid unit, please select CAL or KJ ", HttpStatus.BAD_REQUEST,null);
+            }
+            updatedUser.setFirstName(user.getFirstName());
+            updatedUser.setLastName(user.getLastName());
+            updatedUser.setBmr(user.getBmr());
+            updatedUser.setAllowance(user.getAllowance());
+            updatedUser.setUsername(user.getUsername());
+            updatedUser.setPreferedUnit(user.getPreferedUnit());
+
+            User userObj = userRepo.save(updatedUser);
+            userObj.add(linkTo(methodOn(UserController.class).getUserById(userObj.getId())).withSelfRel());
+            userObj.add(linkTo(methodOn(UserController.class).getAllUsers()).withSelfRel());
+            return ResponseHandler.parseResponse("Successfully updated user: " + id.toString(), HttpStatus.OK, userObj);
+        }
+    }
+
+    @DeleteMapping("/remove/user/{id}")
+    public ResponseEntity<Object> removeUser(@PathVariable Long id) {
+        Optional<User> userCheck = userRepo.findById(id);
+        if(userCheck.isEmpty()){
+            return ResponseHandler.parseResponse("Can not delete, user does not exist", HttpStatus.BAD_REQUEST,null);
+        } else {
+            userRepo.deleteById(id);
+            return ResponseHandler.parseResponse("Successfully deleted the user", HttpStatus.OK,null);
+        }
     }
 }
