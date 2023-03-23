@@ -1,6 +1,7 @@
 package com.hive.calorieTracker.controller;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hive.calorieTracker.constants.Unit;
 import com.hive.calorieTracker.model.FoodEntry;
 import com.hive.calorieTracker.repository.FoodEntryRepo;
 import jakarta.ws.rs.QueryParam;
@@ -28,7 +29,7 @@ public class CaloriesPerDayController {
     private FoodEntryRepo foodEntryRepo;
 
     @GetMapping("/getDayCalories/{id}/total")
-    public ResponseEntity<Object> getDayCalories(@PathVariable Long id, @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws JSONException {
+    public ResponseEntity<Object> getDayCalories(@PathVariable Long id, @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
 
         List<FoodEntry> foodEntries = foodEntryRepo.findAll().stream().
                 filter(foodEntry -> foodEntry.getUserid() == id).
@@ -52,3 +53,4 @@ public class CaloriesPerDayController {
         return ResponseHandler.parseResponse("Successfully obtained entries total cal: " + totalCalories, HttpStatus.OK, map);
     }
 }
+
