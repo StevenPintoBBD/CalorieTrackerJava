@@ -1,5 +1,7 @@
 package com.hive.calorieTracker.rest;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +19,8 @@ import java.util.stream.Collectors;
 @RestController
 class BmrController {
 
-    @Inject
-    BmrRepository bmrRepository;
-    @Inject
-    BmrModelAssembler assembler;
+    private final BmrRepository bmrRepository;
+    private final BmrModelAssembler assembler;
 
     BmrController(BmrRepository bmrRepository,
                   BmrModelAssembler assembler) {
@@ -32,18 +32,17 @@ class BmrController {
     @GetMapping("/bmr")
     CollectionModel<EntityModel<Bmr>> all() {
 
-        List<EntityModel<Bmr>> orders = bmrRepository.findAll().stream()
+        List<EntityModel<Bmr>> bmr = bmrRepository.findAll().stream()
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
 
-        return new CollectionModel<>(orders,
+        return new CollectionModel<>(bmr,
                 linkTo(methodOn(BmrController.class).all()).withSelfRel());
     }
 
-    @GetMapping("/orders/{id}")
+    @GetMapping("/bmr/{id}")
     EntityModel<Bmr> one(@PathVariable Long id) {
-        Bmr bmr = bmrRepository.findById(id)
-                .orElseThrow(() -> new BmrNotFoundException(id));
+        Bmr bmr = bmrRepository.findById(id).orElseThrow();
 
         return assembler.toModel(bmr);
     }
