@@ -1,21 +1,15 @@
 package com.hive.calorieTracker.controller;
 
-import com.hive.calorieTracker.exceptions.FoodEntryNotFoundException;
-import com.hive.calorieTracker.model.FoodEntry;
+import com.hive.calorieTracker.constants.Unit;
 import com.hive.calorieTracker.model.User;
 import com.hive.calorieTracker.repository.FoodEntryRepo;
 import com.hive.calorieTracker.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.hateoas.CollectionModel;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -28,41 +22,56 @@ public class UserController {
     private UserRepo userRepo;
 
     @GetMapping("/getUser/{id}")
-    public ResponseEntity<User> one(@PathVariable Long id) {
+    public ResponseEntity<Object> getUserById(@PathVariable Long id) {
+        try{
+            Optional<User> user = userRepo.findById(id);
+            if (user.isEmpty()) {
+                return ResponseHandler.parseResponse("No user with the ID: " + id.toString() + " was found",
+                        HttpStatus.NOT_FOUND, null);
+            }
 
-        User user = userRepo.findById(id)
-                .orElseThrow(() -> new FoodEntryNotFoundException(id));
-        user.add(linkTo(methodOn(UserController.class).one(id)).withSelfRel());
-        user.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
-        return new ResponseEntity<>(user, HttpStatus.OK);
+            user.get().add(linkTo(methodOn(UserController.class).getUserById(id)).withSelfRel());
+            user.get().add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
+            return ResponseHandler.parseResponse("Success", HttpStatus.OK, user.get());
+        } catch (Exception e) {
+            return ResponseHandler.parseResponse("Invalid", HttpStatus.INTERNAL_SERVER_ERROR,null);
+        }
     }
 
     @GetMapping("/getAllUsers")
-    public ResponseEntity<Collection<User>> getAllUsers(){
+    public ResponseEntity<Object> getAllUsers(){
         try {
-            Collection<User> users = userRepo.findAll();
-            List<User> response = new ArrayList<>();
-            users.forEach(user -> {
-                user.add(linkTo(methodOn(UserController.class).one(user.getId())).withSelfRel());
-                user.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
-                response.add(user);
-            });
-
-            if(response.isEmpty()){
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            List<User> users = userRepo.findAll();
+            if(users.isEmpty()){
+                return ResponseHandler.parseResponse("No users found", HttpStatus.NO_CONTENT, null);
             }
+            users = users.stream().map(user -> {
+                        user.add(linkTo(methodOn(UserController.class).getUserById(user.getId())).withSelfRel());
+                        user.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
+                        return user;
+                    }
+            ).collect(Collectors.toList());
 
-            return new ResponseEntity<>(response,HttpStatus.OK);
+            return ResponseHandler.parseResponse("Success", HttpStatus.OK, users);
         }
         catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseHandler.parseResponse("Sorry, we are experiencing technical difficulties", HttpStatus.INTERNAL_SERVER_ERROR,null);
         }
     }
     @PostMapping("/upload/user")
-    ResponseEntity<?> addUser(@RequestBody User user){
+    ResponseEntity<Object> addUser(@RequestBody User user) {
+
+        //Do validation for the user
+        if(user.getFirstName().isEmpty() || user.getLastName().isEmpty()){
+
+            return ResponseHandler.parseResponse("Bad request: invalid first or last name ", HttpStatus.BAD_REQUEST,null);
+        } else if (!(user.getPreferedUnit() == Unit.CAL || user.getPreferedUnit() == Unit.KJ)) {
+            return ResponseHandler.parseResponse("Bad request: invalid unit, please select CAL or KJ ", HttpStatus.BAD_REQUEST,null);
+        }
 
         User userObj = userRepo.save(user);
-        userObj.add(linkTo(methodOn(UserController.class).one(userObj.getId())).withSelfRel());
-        return new ResponseEntity<>(userObj, HttpStatus.OK);
+        userObj.add(linkTo(methodOn(UserController.class).getUserById(userObj.getId())).withSelfRel());
+        userObj.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
+        return ResponseHandler.parseResponse("Successfully added the user", HttpStatus.OK, userObj);
     }
 }
