@@ -1,59 +1,56 @@
-package com.hive.calorieTracker.rest;
+package com.hive.calorieTracker.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
-
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
+import com.hive.calorieTracker.model.Bmr;
+import com.hive.calorieTracker.repository.BmrRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 
 @RestController
 class BmrController {
-
-    private final BmrRepository bmrRepository;
-    private final BmrModelAssembler assembler;
-
-    BmrController(BmrRepository bmrRepository,
-                  BmrModelAssembler assembler) {
-
-        this.bmrRepository = bmrRepository;
-        this.assembler = assembler;
+    @Autowired
+    private BmrRepository bmrRepo;
+    
+    @PutMapping("/bmr/upload/{id}")
+    public ResponseEntity<Bmr> addBmr(@PathVariable Long id, @RequestBody Bmr newBmr) {
+        Bmr bmrObj = bmrRepo.save(newBmr);
+        return new ResponseEntity<>(bmrObj, HttpStatus.OK);
     }
 
     @GetMapping("/bmr")
-    CollectionModel<EntityModel<Bmr>> all() {
+    public ResponseEntity<List<Bmr>> getAllBmr() {
+        try {
+            List<Bmr> bmrList = new ArrayList<>();
+            bmrRepo.findAll().forEach(bmrList::add);
 
-        List<EntityModel<Bmr>> bmr = bmrRepository.findAll().stream()
-                .map(assembler::toModel)
-                .collect(Collectors.toList());
+            if (bmrList.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
 
-        return new CollectionModel<>(bmr,
-                linkTo(methodOn(BmrController.class).all()).withSelfRel());
+            return new ResponseEntity<>(bmrList, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/bmr/{id}")
-    EntityModel<Bmr> one(@PathVariable Long id) {
-        Bmr bmr = bmrRepository.findById(id).orElseThrow();
+    public ResponseEntity<Bmr> getBmrById(@PathVariable Long id) {
+        Optional<Bmr> bmr = bmrRepo.findById(id);
 
-        return assembler.toModel(bmr);
-    }
+        if (bmr.isPresent()) {
+            return new ResponseEntity<>(bmr.get(), HttpStatus.OK);
+        }
 
-    @PostMapping("/bmr")
-    ResponseEntity<EntityModel<Bmr>> newBmr(@RequestBody Bmr bmr) {
-
-        Bmr newBmr = bmrRepository.save(bmr);
-
-        return ResponseEntity
-                .created(linkTo(methodOn(BmrController.class).one(newBmr.getId())).toUri())
-                .body(assembler.toModel(newBmr));
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

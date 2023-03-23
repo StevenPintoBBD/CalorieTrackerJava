@@ -1,74 +1,86 @@
-package com.hive.calorieTracker.rest;
+package com.hive.calorieTracker.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
-
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
+import com.hive.calorieTracker.model.Allowance;
+import com.hive.calorieTracker.model.Status;
+import com.hive.calorieTracker.repository.AllowanceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
-class AllowanceController {
-    private final AllowanceRepository allowanceRepository;
-    private final AllowanceModelAssembler assembler;
+public class AllowanceController {
+    @Autowired
+    private AllowanceRepository allowanceRepo;
 
-    AllowanceController(AllowanceRepository allowanceRepository, AllowanceModelAssembler assembler) {
-        this.allowanceRepository = allowanceRepository;
-        this.assembler = assembler;
+    @PutMapping("/allowance/upload/{id}")
+    public ResponseEntity<Allowance> addAllowance(@PathVariable Long id, @RequestBody Allowance newAllowance) {
+        Allowance allowanceObj = allowanceRepo.save(newAllowance);
+        return new ResponseEntity<>(allowanceObj, HttpStatus.OK);
     }
 
     @GetMapping("/allowance")
-    CollectionModel<EntityModel<Allowance>> all() {
+    public ResponseEntity<List<Allowance>> getAllAllowance() {
+        try {
+            List<Allowance> allowanceList = new ArrayList<>();
+            allowanceRepo.findAll().forEach(allowanceList::add);
 
-        List<EntityModel<Allowance>> allowance = allowanceRepository.findAll().stream()
-                .map(assembler::toModel)
-                .collect(Collectors.toList());
+            if (allowanceList.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
 
-        return new CollectionModel<>(allowance,
-                linkTo(methodOn(AllowanceController.class).all()).withSelfRel());
+            return new ResponseEntity<>(allowanceList, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/allowance/{id}")
-    EntityModel<Allowance> one(@PathVariable Long id) {
-        Allowance allowance = allowanceRepository.findById(id)
-                .orElseThrow(() -> new AllowanceNotFoundException(id));
+    public ResponseEntity<Allowance> getAllowanceById(@PathVariable Long id) {
+        Optional<Allowance> allowance = allowanceRepo.findById(id);
 
-        return assembler.toModel(allowance);
-    }
+        if (allowance.isPresent()) {
+            return new ResponseEntity<>(allowance.get(), HttpStatus.OK);
+        }
 
-    @PostMapping("/allowance")
-    ResponseEntity<EntityModel<Allowance>> newAllowance(@RequestBody Allowance allowance) {
-
-        allowance.setStatus(Status.LOSE_WEIGHT);
-        Allowance newAllowance = allowanceRepository.save(allowance);
-
-        return ResponseEntity
-                .created(linkTo(methodOn(AllowanceController.class).one(newAllowance.getId())).toUri())
-                .body(assembler.toModel(newAllowance));
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PutMapping("/allowance/{id}/LOSE_WEIGHT")
-    ResponseEntity<RepresentationModel> loseWheight(@PathVariable Long id) {
-        Allowance allowance = allowanceRepository.findById(id).orElseThrow();
+    public ResponseEntity<Allowance> loseWeight(@PathVariable Long id) {
+        Optional<Allowance> oldAllowance = allowanceRepo.findById(id);
 
-        if (allowance.getStatus() == (Status.GAIN_WEIGHT)) {
-            allowance.setStatus(Status.LOSE_WEIGHT);
-            return ResponseEntity.ok(assembler.toModel(allowanceRepository.save(allowance)));
+        if (oldAllowance.isPresent()) {
+            Allowance allowance = oldAllowance.get();
+            if (allowance.getStatus() == (Status.GAIN_WEIGHT)) {
+                allowance.setStatus(Status.LOSE_WEIGHT);
+                Allowance allowanceObj = allowanceRepo.save(allowance);
+                return new ResponseEntity<>(allowanceObj, HttpStatus.OK);
+            }
         }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new VndErrors.VndError("Method","You can't lose weight if the " + allowance.getStatus() + " status"));
+    @PutMapping("/allowance/{id}/GAIN_WEIGHT")
+    public ResponseEntity<Allowance> gainWeight(@PathVariable Long id) {
+        Optional<Allowance> oldAllowance = allowanceRepo.findById(id);
+
+        if (oldAllowance.isPresent()) {
+            Allowance allowance = oldAllowance.get();
+            if (allowance.getStatus() == (Status.LOSE_WEIGHT)) {
+                allowance.setStatus(Status.GAIN_WEIGHT);
+                Allowance allowanceObj = allowanceRepo.save(allowance);
+                return new ResponseEntity<>(allowanceObj, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

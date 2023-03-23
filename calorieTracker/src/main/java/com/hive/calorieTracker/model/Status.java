@@ -1,6 +1,6 @@
-package com.hive.calorieTracker.rest;
+package com.hive.calorieTracker.model;
 
-enum Status {
+public enum Status {
     GAIN_WEIGHT,
     LOSE_WEIGHT;
 }
