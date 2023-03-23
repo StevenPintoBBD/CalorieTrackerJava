@@ -77,6 +77,7 @@ public class UserController {
         return ResponseHandler.parseResponse("Successfully added the user", HttpStatus.OK, userObj);
     }
 
+    // I am unsure if the getUserAllowance and getUserBmr should be added to the linkTo stuff
     @GetMapping("/user/allowance/{username}")
     ResponseEntity<Object> getUserAllowance(@PathVariable String userName) {
         try {
