@@ -15,11 +15,13 @@ Repo to store the source files for the calorie tracker for the Java levelup
 
 <ol>
   <li>
-    Get days calorie intake
+    Get days calorie intake based on a specific day for a user
     <ul>
-      <li>username: Approprpiate user for that day, date: requested date for total calories</li>
       <li>method: GET</li>
-      <li>URI: '{dev-path}/<b>{username}</b>/<b>{date}</b>/total'</li>
+      <li>RequestParam: {
+        entryData
+      }</li>
+      <li>URI: '{dev-path}/getDayCalories/{id}/total'</li>
       </ul>
   </li>
   <li>
@@ -30,10 +32,46 @@ Repo to store the source files for the calorie tracker for the Java levelup
       <li>body: {
         unit: {unit}
       }</li>
-      <li>URI: '{dev-path}/<b>{username}</b>/units'</li>
+      <li>URI: '{dev-path}/<b>{id}</b>/units'</li>
      </ul>
   </li>
   <li>
+    Get users allowance
+    <ul>
+      <li>method: GET</li>
+      <li>URI: '{dev-path}/user/allowance/{id}'</li>
+     </ul>
+  </li>
+  <li>
+    Get users allowance
+    <ul>
+      <li>method: GET</li>
+      <li>URI: '{dev-path}/user/bmr/{id}'</li>
+     </ul>
+  </li>
+  
+  <li>
+    update users bmr
+    <ul>
+      <li>method: PUT</li>
+      <li>RequestParam: {bmr:{new bmr}}      </li>
+      <li>URI: '{dev-path}/user/bmr/{id}/update'</li>
+     </ul>
+  </li>
+  <li>
+    Change users goal to lose weight
+    <ul>
+      <li>method: PUT</li>
+      <li>URI: '{dev-path}/user/allowance/{id}/lose_weight'</li>
+     </ul>
+  </li>
+  <li>
+    Change users goal to gain weight
+    <ul>
+      <li>method: PUT</li>
+      <li>URI: '{dev-path}/user/allowance/{id}/gain'</li>
+     </ul>
+  </li><li>
     Get current day's  allowance and if user will gain or lose.
     <ul>
       <li>username: the specific user's name</li>
@@ -50,31 +88,113 @@ Repo to store the source files for the calorie tracker for the Java levelup
     </ul>
   </li>
   <li>
-    Add item
+    Add food entry
     <ul>
-      <li>name: Items name, calorie: the calorie associated with the item</li>
       <li>method: POST</li>
       <li>body: {
         name: {name},
-        calorie: {calorie}
+        calories: {calorie}
+        user_id: {id}
+        entryDate: {date}
       }</li>
-      <li>URI: '{dev-path}/<b>{username}</b>/upload/item'</li>
+      <li>URI: '{dev-path}/<b>{id}</b>/upload/foodEntry'</li>
+     </ul>
+  </li>
+  
+  <li>
+    Update food entry
+    <ul>
+      <li>method: PUT</li>
+      <li>body: {
+        name: {name},
+        calories: {calorie}
+        user_id: {id}
+        entryDate: {date}
+      }</li>
+      <li>URI: '{dev-path}/update/foodEntry/{id}'</li>
+     </ul>
+  </li>
+  
+  <li>
+    remove food entry
+    <ul>
+      <li>method: DELETE</li>
+      <li>URI: '{dev-path}/remove/foodEntry/{id}'</li>
      </ul>
   </li>
   <li>
     Add user
     <ul>
-      <li>username: user's name, weight: user's weight, height: user's height, activity: user's activitiy level,</li>
       <li>method: POST</li>
       <li>body: {
         username: {username},
+        firstName: {firstName},
+        lastName: {lastName},
+        bmr: {bmr},
+        allowance: {allowance},
+        preferedUnit: {preferedUnit},
         weight: {weight},
-        height: {height},
-        activity: {activity}
+        goal: {goal}
       }</li>
-      <li>URI: '{dev-path}/<b>{username}</b>/upload/user'</li>
+      <li>URI: '{dev-path}/upload/user'</li>
      </ul>
   </li>
+  <li>
+    update user
+    <ul>
+      <li>method: PUT</li>
+      <li>body: {
+        username: {username},
+        firstName: {firstName},
+        lastName: {lastName},
+        bmr: {bmr},
+        allowance: {allowance},
+        preferedUnit: {preferedUnit},
+        weight: {weight},
+        goal: {goal}
+      }</li>
+      <li>URI: '{dev-path}/update/user/{id}'</li>
+     </ul>
+  </li>
+  
+  <li>
+    delete user
+    <ul>
+      <li>method: DELETE</li>
+      <li>URI: '{dev-path}/remove/user/{id}'</li>
+     </ul>
+  </li>
+  
+   <li>
+    Get user by ID
+    <ul>
+      <li>id: user's id</li>
+      <li>method: GET</li>
+      <li>URI: '{dev-path}/getUser/{id}'</li>
+     </ul>
+  </li>
+  <li>
+    Get all users
+    <ul>
+      <li>method: GET</li>
+      <li>URI: '{dev-path}/getAllUsers'</li>
+     </ul>
+  </li>
+  <li>
+    Get all food entries
+    <ul>
+      <li>method: GET</li>
+      <li>URI: '{dev-path}/getAllEntries'</li>
+     </ul>
+  </li>
+  <li>
+    Get food entry by ID
+    <ul>
+      <li>method: GET</li>
+      <li>URI: '{dev-path}/getEntry/{id}'</li>
+     </ul>
+  </li>
+  
   
 
 </ol>
